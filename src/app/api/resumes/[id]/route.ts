@@ -6,6 +6,7 @@ const UpdateResumeSchema = z.object({
   title: z.string().min(1).optional(),
   content: z.string().optional(),
   isDefault: z.boolean().optional(),
+  versionDescription: z.string().optional(),
 });
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -28,8 +29,21 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     if (data.isDefault) {
       await prisma.resume.updateMany({ data: { isDefault: false } });
     }
-    const resume = await prisma.resume.update({ where: { id }, data });
-    return NextResponse.json(resume);
+    const resume = await prisma.resume.findUnique({ where: { id } });
+    if (!resume) return NextResponse.json({ error: "Resume not found" }, { status: 404 });
+    const updateData: { title?: string; content?: string; isDefault?: boolean; version?: number; lastVersionDescription?: string | null } = {};
+    if (data.title !== undefined) updateData.title = data.title;
+    if (data.content !== undefined) updateData.content = data.content;
+    if (data.isDefault !== undefined) updateData.isDefault = data.isDefault;
+    if (data.versionDescription !== undefined) {
+      updateData.version = resume.version + 1;
+      updateData.lastVersionDescription = data.versionDescription || null;
+    }
+    const updated = await prisma.resume.update({
+      where: { id },
+      data: updateData,
+    });
+    return NextResponse.json(updated);
   } catch (e) {
     if (e instanceof z.ZodError) return NextResponse.json(e.issues, { status: 400 });
     console.error(e);

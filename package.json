@@ -12,20 +12,28 @@
     "vercel:pull-env": "bash scripts/vercel-pull-env.sh"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
     "@prisma/adapter-pg": "^7.4.0",
     "@prisma/client": "^7.4.0",
+    "diff": "^8.0.3",
     "firebase": "^12.9.0",
     "gray-matter": "^4.0.3",
+    "mammoth": "^1.11.0",
+    "md-to-pdf": "^5.2.5",
     "next": "16.1.6",
+    "openai": "^6.22.0",
     "pg": "^8.18.0",
     "prisma": "^7.4.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "turndown": "^7.2.2",
+    "unpdf": "^1.4.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
+    "@types/diff": "^7.0.2",
     "@types/node": "^20",
     "@types/pg": "^8.16.0",
     "@types/react": "^19",

@@ -25,15 +25,18 @@ model Profile {
 }
 
 model Resume {
-  id        String   @id @default(cuid())
-  profileId String
-  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  title     String   // e.g. "Software Engineer 2025"
-  content   String   // Markdown or structured JSON for sections
-  version   Int      @default(1)
-  isDefault Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                    String   @id @default(cuid())
+  profileId             String
+  profile               Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  title                 String   // e.g. "Software Engineer 2025"
+  content               String   // Markdown (editable); converted from PDF/Word or entered directly
+  version               Int      @default(1)
+  isDefault             Boolean  @default(false)
+  originalFormat        String?  // "pdf" | "docx" | "md" when created via upload
+  originalFilePath      String?  // path or URL to stored original file (PDF/Word)
+  lastVersionDescription String? // optional description when saving a version (e.g. after AI edit)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 }
 
 // ----- Keywords (for ATS, job descriptions) -----
