@@ -1,0 +1,113 @@
+// Launch Sequence - Job search hub: resume, keywords, interview prep, applications
+// https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ----- Profile & resume -----
+model Profile {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String?
+  phone     String?
+  linkedIn  String?
+  website   String?
+  summary   String?  // Professional summary
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  resumes   Resume[]
+  keywords  Keyword[]
+}
+
+model Resume {
+  id        String   @id @default(cuid())
+  profileId String
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  title     String   // e.g. "Software Engineer 2025"
+  content   String   // Markdown or structured JSON for sections
+  version   Int      @default(1)
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ----- Keywords (for ATS, job descriptions) -----
+model Keyword {
+  id        String   @id @default(cuid())
+  profileId String?
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: SetNull)
+  value     String   // the keyword phrase
+  category  String?  // e.g. "skills", "tools", "domain"
+  createdAt DateTime @default(now())
+}
+
+// ----- Interview prep: Q&A, question banks, flash cards, quizzes -----
+model QuestionBank {
+  id          String     @id @default(cuid())
+  name        String     // e.g. "System Design", "Behavioral"
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  questions   Question[]
+  quizzes     Quiz[]
+}
+
+model Question {
+  id             String       @id @default(cuid())
+  bankId         String
+  bank           QuestionBank @relation(fields: [bankId], references: [id], onDelete: Cascade)
+  questionText   String
+  answerText     String?      // Your answer or model answer
+  type           String       @default("qa") // qa | behavioral | technical | puzzle
+  difficulty     String?      // easy | medium | hard
+  tags           String?      // comma-separated
+  source         String?      // e.g. "LeetCode", "Company X"
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  flashCardStats FlashCardStat[]
+}
+
+model FlashCardStat {
+  id         String   @id @default(cuid())
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  correct    Boolean
+  reviewedAt DateTime @default(now())
+}
+
+model Quiz {
+  id        String       @id @default(cuid())
+  name      String
+  bankId    String?
+  bank      QuestionBank? @relation(fields: [bankId], references: [id], onDelete: SetNull)
+  createdAt DateTime    @default(now())
+  results   QuizResult[]
+}
+
+model QuizResult {
+  id        String   @id @default(cuid())
+  quizId    String
+  quiz      Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  score     Int      // e.g. correct count
+  total     Int
+  takenAt   DateTime @default(now())
+}
+
+// ----- Applications: positions to apply to, auto-apply, required info -----
+model Position {
+  id           String   @id @default(cuid())
+  title        String
+  company      String?
+  url          String   // application link
+  source       String?  // e.g. "LinkedIn", "company site"
+  status       String   @default("pending") // pending | applied | needs_info | rejected
+  requiredInfo String?  // JSON or markdown: questions/fields still needed
+  appliedAt    DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
